@@ -66,8 +66,14 @@ function displayResults(places) {
     card.classList.add('card');
 
     const img = document.createElement('img');
-    img.src = place.imageUrl;
+    img.src = place.imageUrl || getSvgPlaceholder(place.name);
     img.alt = place.name;
+    img.addEventListener('error', () => {
+      if (!img.src.startsWith('data:')) {
+        img.src = getSvgPlaceholder(place.name);
+        img.alt = `${place.name} image not available`;
+      }
+    });
 
     const cardBody = document.createElement('div');
     cardBody.classList.add('card-body');
@@ -109,4 +115,14 @@ function displayResults(places) {
 function clearResults() {
   searchInput.value = '';
   resultsContainer.innerHTML = '';
+}
+
+function getSvgPlaceholder(text) {
+  const encodedText = encodeURIComponent(text || 'No Image');
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="400" height="240">
+      <rect width="400" height="240" fill="#e2e8f0" />
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#64748b" font-family="Arial, sans-serif" font-size="24">${encodedText}</text>
+    </svg>
+  `)}`;
 }
